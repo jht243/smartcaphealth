@@ -2,6 +2,7 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const path = require('path');
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.set('trust proxy', true);
@@ -11,6 +12,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
+
+// Configure Nodemailer Transporter
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: process.env.SMTP_PORT || 587,
+    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+    }
+});
 
 // Determine Database URL
 const dbPath = process.env.DATABASE_URL || path.join(__dirname, 'waitlist.db');
@@ -59,7 +71,25 @@ app.post('/api/waitlist', (req, res) => {
             console.error('Error inserting lead:', err.message);
             return res.status(500).json({ success: false, message: 'Internal server error.' });
         }
-        res.json({ success: true, message: 'Successfully joined waitlist.', leadId: this.lastID });
+        const leadId = this.lastID;
+        res.json({ success: true, message: 'Successfully joined waitlist.', leadId });
+
+        // Trigger email notification asynchronously
+        if (process.env.NOTIFICATION_EMAIL && process.env.SMTP_USER && process.env.SMTP_PASS) {
+            const mailOptions = {
+                from: `"SmartCap Alerts" <${process.env.SMTP_USER}>`,
+                to: process.env.NOTIFICATION_EMAIL,
+                subject: `New Waitlist Signup: ${name}`,
+                text: `You just received a new SmartCap waitlist signup!\n\nName: ${name}\nEmail: ${email}\nA/B Variant Seen: ${ab_headline_variant || 'None'}\n\nLog in to your dashboard to view all your leads.`
+            };
+            transporter.sendMail(mailOptions, (mailErr, info) => {
+                if (mailErr) {
+                    console.error('Failed to send notification email:', mailErr.message);
+                } else {
+                    console.log('Notification email sent successfully:', info.messageId);
+                }
+            });
+        }
     });
     stmt.finalize();
 });

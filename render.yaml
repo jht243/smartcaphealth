@@ -11,3 +11,10 @@ services:
     envVars:
       - key: DATABASE_URL
         value: /opt/render/project/src/data/waitlist.db
+      - key: NOTIFICATION_EMAIL
+        value: "your_email@example.com" # Where to send notifications
+      - key: SMTP_USER
+        value: "your_smtp_email@gmail.com" # The email sending the notification
+      - key: SMTP_PASS
+        value: "your_app_password" # The App Password or SMTP password
+      # Optional: SMTP_HOST and SMTP_PORT (defaults to Gmail 587)
