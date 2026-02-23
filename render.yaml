@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: pill-bottle-landing
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    disk:
+      name: sqlite-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        value: /opt/render/project/src/data/waitlist.db

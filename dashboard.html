@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard | SmartCap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Reuse global variables, but isolated standard admin styles -->
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+            /* Badges */
+            --badge-a-bg: #dbeafe;
+            --badge-a-text: #1e40af;
+            --badge-b-bg: #d1fae5;
+            --badge-b-text: #065f46;
+            --badge-c-bg: #fef3c7;
+            --badge-c-text: #92400e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 60px;
+        }
+
+        /* HEADER */
+        .admin-header {
+            background-color: #0f172a;
+            color: white;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .admin-header a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .admin-header a:hover {
+            color: white;
+        }
+
+        /* MAIN WRAPPER */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        .dashboard-controls {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            background-color: white;
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #f1f5f9;
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card.highlight {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary), var(--shadow-md);
+        }
+
+        .stat-title {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-subtext {
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* TABLES */
+        .card-table-wrapper {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background-color: #f8fafc;
+        }
+
+        .card-header h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th,
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: white;
+            color: var(--text-muted);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .variant-a {
+            background: var(--badge-a-bg);
+            color: var(--badge-a-text);
+        }
+
+        .variant-b {
+            background: var(--badge-b-bg);
+            color: var(--badge-b-text);
+        }
+
+        .variant-c {
+            background: var(--badge-c-bg);
+            color: var(--badge-c-text);
+        }
+
+        .variant-default {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .time-cell {
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .truncate {
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* LOADER */
+        #loader {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="admin-header">
+        <h1>SmartCap Analytics Dashboard</h1>
+        <a href="/">← View Landing Page</a>
+    </header>
+
+    <div class="container">
+        <div class="dashboard-controls">
+            <button class="btn" onclick="fetchDashboardData()" id="refreshBtn">Refresh Data</button>
+        </div>
+
+        <div id="loader">Loading dashboard data...</div>
+
+        <div id="dashboardContent" style="display: none;">
+
+            <!-- Dynamic Stats Grid -->
+            <div class="stats-grid" id="statsGrid">
+                <!-- Populated via JS -->
+            </div>
+
+            <!-- Leads Table -->
+            <div class="card-table-wrapper">
+                <div class="card-header">
+                    <h2>Recent Waitlist Signups</h2>
+                </div>
+                <div class="table-responsive">
+                    <table id="leadsTable">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>A/B Variant Seen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Page Views Table -->
+            <div class="card-table-wrapper">
+                <div class="card-header">
+                    <h2>Recent Page Views</h2>
+                </div>
+                <div class="table-responsive">
+                    <table id="viewsTable">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>IP Address</th>
+                                <th>Source / Referrer</th>
+                                <th>UTM Campaign</th>
+                                <th>Landing URL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Utilities
+        function formatDate(dateString) {
+            const d = new Date(dateString);
+            return d.toLocaleString('en-US', {
+                month: 'short', day: 'numeric',
+                hour: 'numeric', minute: '2-digit'
+            });
+        }
+
+        function getVariantShortName(variantString) {
+            if (!variantString) return 'Unknown';
+            if (variantString.includes("Never Miss a Dose")) return "Control (A)";
+            if (variantString.includes("Peace of Mind")) return "Angle 1 (B)";
+            if (variantString.includes("Automatic Reminders")) return "Angle 2 (C)";
+            return "Other";
+        }
+
+        function getVariantBadgeClass(shortName) {
+            if (shortName.includes("(A)")) return "variant-a";
+            if (shortName.includes("(B)")) return "variant-b";
+            if (shortName.includes("(C)")) return "variant-c";
+            return "variant-default";
+        }
+
+        // Fetch & Render data
+        async function fetchDashboardData() {
+            const btn = document.getElementById('refreshBtn');
+            const loader = document.getElementById('loader');
+            const content = document.getElementById('dashboardContent');
+
+            btn.textContent = "Refreshing...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+
+                renderStats(data);
+                renderLeadsTable(data.recentLeads);
+                renderViewsTable(data.recentPageViews);
+
+                loader.style.display = 'none';
+                content.style.display = 'block';
+            } catch (err) {
+                console.error("Dashboard fetch error:", err);
+                loader.textContent = "Error loading data. Is the server running?";
+            } finally {
+                btn.textContent = "Refresh Data";
+                btn.disabled = false;
+            }
+        }
+
+        function renderStats(data) {
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = ''; // clear existing
+
+            // Total Leads Card (Highlight)
+            statsGrid.innerHTML += `
+                <div class="stat-card highlight">
+                    <div class="stat-title">Total Waitlist Signups</div>
+                    <div class="stat-value">${data.totalLeads}</div>
+                    <div class="stat-subtext">All time conversions</div>
+                </div>
+            `;
+
+            // Total Page Views Card
+            statsGrid.innerHTML += `
+                <div class="stat-card">
+                    <div class="stat-title">Total Page Views</div>
+                    <div class="stat-value">${data.totalPageViews}</div>
+                    <div class="stat-subtext">All time views</div>
+                </div>
+            `;
+
+            // Conversion rate calc (basic)
+            let convRate = "0.0";
+            if (data.totalPageViews > 0) {
+                convRate = ((data.totalLeads / data.totalPageViews) * 100).toFixed(1);
+            }
+            statsGrid.innerHTML += `
+                <div class="stat-card">
+                    <div class="stat-title">Overall Conv. Rate</div>
+                    <div class="stat-value">${convRate}%</div>
+                    <div class="stat-subtext">Leads / Page Views</div>
+                </div>
+            `;
+
+            // Variants Cards
+            if (data.variants) {
+                Object.keys(data.variants).forEach(key => {
+                    const count = data.variants[key];
+                    const shortName = getVariantShortName(key);
+                    const percent = data.totalLeads > 0 ? Math.round((count / data.totalLeads) * 100) : 0;
+
+                    statsGrid.innerHTML += `
+                        <div class="stat-card">
+                            <div class="stat-title">Conversion: ${shortName}</div>
+                            <div class="stat-value">${count}</div>
+                            <div class="stat-subtext">${percent}% of total leads</div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function renderLeadsTable(leads) {
+            const tbody = document.querySelector('#leadsTable tbody');
+            tbody.innerHTML = '';
+
+            if (!leads || leads.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center">No leads found.</td></tr>';
+                return;
+            }
+
+            leads.forEach(lead => {
+                const shortName = getVariantShortName(lead.ab_variant);
+                const badgeClass = getVariantBadgeClass(shortName);
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="time-cell">${formatDate(lead.created_at)}</td>
+                    <td><strong>${lead.name}</strong></td>
+                    <td>${lead.email}</td>
+                    <td><span class="badge ${badgeClass}">${shortName}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderViewsTable(views) {
+            const tbody = document.querySelector('#viewsTable tbody');
+            tbody.innerHTML = '';
+
+            if (!views || views.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No page views found.</td></tr>';
+                return;
+            }
+
+            views.forEach(view => {
+                let source = view.utm_source ? `${view.utm_source} / ${view.utm_medium}` : (view.referrer || 'Direct');
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="time-cell">${formatDate(view.created_at)}</td>
+                    <td class="time-cell">${view.ip_address || '-'}</td>
+                    <td><div class="truncate" title="${source}">${source}</div></td>
+                    <td>${view.utm_campaign || '-'}</td>
+                    <td><div class="truncate" title="${view.page_url}">${view.page_url}</div></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Init on load
+        document.addEventListener('DOMContentLoaded', fetchDashboardData);
+    </script>
+</body>
+
+</html>
